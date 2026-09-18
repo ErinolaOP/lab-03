@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 fun CityListScreen(
     cities: List<City>,
     onAddCity: (City) -> Unit,
+    onUpdateCity : (City, City) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var selectedCity by remember { mutableStateOf<City?>(null) }
@@ -44,6 +45,7 @@ fun CityListScreen(
         name = newCityName,
         province = newProvinceName
     )
+    val isEditingorAdding = showAddCityFields || selectedCity != null
 
     Column(modifier = modifier.fillMaxWidth()) {
         Row(modifier = Modifier.fillMaxWidth(),
@@ -52,11 +54,12 @@ fun CityListScreen(
                 FloatingActionButton(
                     modifier = Modifier.padding(16.dp),
                     onClick = {
+                        selectedCity = null
                         showAddCityFields = !showAddCityFields
                     }
                 ) {Text("+") }
         }
-        if (showAddCityFields) {
+        if (isEditingorAdding) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -65,7 +68,7 @@ fun CityListScreen(
                 OutlinedTextField(
                     value = newCityName,
                     onValueChange = { newCityName = it },
-                    label = { Text("City") },
+                    label = { Text(if(selectedCity != null)"Updated City" else "City") },
                     modifier = Modifier.weight(1f)
 
                 )
@@ -73,7 +76,7 @@ fun CityListScreen(
                 OutlinedTextField(
                     value = newProvinceName,
                     onValueChange = { newProvinceName = it },
-                    label = { Text("Province") },
+                    label = { Text(if(selectedCity != null)"Updated Province" else "Province") },
                     modifier = Modifier.weight(1f)
 
                 )
@@ -82,27 +85,34 @@ fun CityListScreen(
                     modifier = Modifier.padding(vertical = 12.dp),
                     onClick = {
                         if (newCityName.isNotBlank() && newProvinceName.isNotBlank()) {
+                            if(selectedCity != null){
+                                onUpdateCity(selectedCity!!, updatedCity)
+                            }
+                            else{
                             onAddCity(
-                                City(
-                                    name = newCityName,
-                                    province = newProvinceName
-                                )
-                            )
+                                City(name = newCityName, province = newProvinceName)
+                            )}
                             newCityName = ""
                             newProvinceName = ""
+                            selectedCity = null
                             showAddCityFields = false
                         }
                     }
                 ) {
-                    Text("Add City")
+                    Text (if(selectedCity != null)("UPDATE CITY") else "ADD CITY")
                 }
             }
         }
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         itemsIndexed(cities) { index, city ->
             CityRow(city = city,
-                isSelected = city == selectedCity,
-                onClick = {selectedCity = city}
+                isSelected = (city == selectedCity),
+                onClick = { //Select city, field population then enters update ver
+                    selectedCity = city
+                    newCityName = city.name
+                    newProvinceName = city.province
+                    showAddCityFields = false
+                }
             )
             if (index < cities.lastIndex) {
                 HorizontalDivider()
@@ -147,7 +157,8 @@ fun CityListScreenPreview() {
                 City("Vancouver", "BC"),
                 City("Calgary", "AB")
             ),
-            onAddCity = {}
+            onAddCity = {},
+            onUpdateCity = {_, _, ->}
         )
     }
 }

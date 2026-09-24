@@ -3,7 +3,7 @@
 ## Student Details
 
 - **Full Name:** `<Oyeladun Erinola>`
-- **CCID:** `<1857949>`
+- **CCID:** `<oyeladun>`
 
 ## References and Resources
 
